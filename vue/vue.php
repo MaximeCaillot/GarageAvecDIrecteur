@@ -38,7 +38,7 @@
 		</p>';
 		$contenu .= afficherErreur('erreurIdSynthese');
 
-	$contenu.='</fieldset>
+		$contenu .= '</fieldset>
 	</form>
 	<form id="rechercheID" action="main.php" method="post"/>
 	<fieldset>
@@ -72,14 +72,13 @@
 				<p><label>Montant max</label><input name="montantMax" type = "text" required/></p>
 				<input type = "submit" name = "ajouterClient" value = "Ajouter Client" />';
 		$contenu .= afficherErreur('erreurClientExiste');
-		$contenu.='</fieldset></form>';
-
+		$contenu .= '</fieldset></form>';
 
 		require_once("vue/gabarit.php");
 
 	}
 
-	function afficherSynthese($client,$interventions,$somme,$dispo)
+	function afficherSynthese($client, $interventions, $somme, $dispo)
 	{
 		$header = '<form action="main.php" method="post"><p>' . $_SESSION['empl']->nomEmploye .
 			'<input type="submit" name="accueil" value="Accueil"/>
@@ -99,12 +98,12 @@
 
 				</fieldset></form>';
 
-		$contenu.='<p>Montant différé en cours : '.$somme.'€</p>';
-		$contenu.='<p>Crédit possible restant : '.$dispo.'</p>';
+		$contenu .= '<p>Montant différé en cours : ' . $somme . '€</p>';
+		$contenu .= '<p>Crédit possible restant : ' . $dispo . '</p>';
 
-		$contenu.='<fieldset><legend>Interventions réalisées</legend>';
-		if(!empty($interventions)) {
-			$contenu.='<table>
+		$contenu .= '<fieldset><legend>Interventions réalisées</legend>';
+		if (!empty($interventions)) {
+			$contenu .= '<table>
 						<tr>
 							<th>Date</th>
 							<th>Type</th>
@@ -113,11 +112,11 @@
 							<th>Montant</th>
 						</tr>';
 			foreach ($interventions as $inter) {
-				$contenu .= '<tr><td>' . $inter->dateIntervention .'</td><td>' . $inter->nomTI .  '</td><td>' . $inter->nomMeca . '</td><td>' . $inter->etat . '</td><td>' . $inter->montant . '</td></tr>';
+				$contenu .= '<tr><td>' . $inter->dateIntervention . '</td><td>' . $inter->nomTI . '</td><td>' . $inter->nomMeca . '</td><td>' . $inter->etat . '</td><td>' . $inter->montant . '</td></tr>';
 			}
-			$contenu.='</table>';
-		}else $contenu.='<p>Aucune intervetion n\'a été réalisée.</p>';
-		$contenu.='</fieldset>';
+			$contenu .= '</table>';
+		} else $contenu .= '<p>Aucune intervetion n\'a été réalisée.</p>';
+		$contenu .= '</fieldset>';
 		require_once("vue/gabarit.php");
 	}
 
@@ -137,7 +136,6 @@
                     <label > ' . $inta->dateIntervention . ' ' . $inta->nomTI . ' ' . $inta->montant . ' </label >
                 </p > ';
 			}
-
 
 			foreach ($diff as $intd) {
 				$contenu .= '
