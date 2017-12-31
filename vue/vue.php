@@ -172,11 +172,122 @@
 				<p><label>motDePasse</label><input name="motDePasse" type = "text"required /></p>
 				<p><label>categorie</label><input type = "text" name = "categorie" required /></p>
 				<p><input type = "submit" name = "creerCompte" value = "Creer un compte" /></p>';
+		if(!empty($_SESSION['nouveauCompte'])){
+			$contenu.='<p>'.$_SESSION['nouveauCompte'].'</p>';
+			unset($_SESSION['nouveauCompte']);
+		}
 		$contenu .= afficherErreur('erreurExiste');
 		$contenu .= afficherErreur('erreurCat');
 		$contenu .= '</fieldset></form>';
+
+
+		$contenu.=' 
+ 					
+ 					
+ 					<form action = "main.php" method = "post" >
+ 					<p>
+ 					<label>NomEmploye</label><input type = "text" name = "nomEmploye"  />
+ 					<input type = "submit" name = "chercherEmployeParNom" value = "Chercher" />
+ 					</p>
+ 					
+ 					</form>
+ 					
+ 					<form action = "main.php" method = "post" >
+ 					<p>
+ 					<input type = "submit" name = "afficherToutLesComptes" value = "Afficher Tout Les Comptes" />
+ 					</p>
+ 					</form>';
+		$contenu .= '<form id = "interventions" action = "main.php" method = "post" >
+				 <fieldset ><legend > Creation d\'un type  d\'intervention  </legend >
+				<p><label>Type Intervention</label><input name="nomTI" type = "text"  required  /></p>
+				<p><label>Montant</label><input name="montant" type = "number" required /></p>
+				<p><label>Liste de pieces</label><input name="listePieces" type = "text" /></p>
+				
+				<p><input type = "submit" name = "creerIntervention" value = "Creer une intervention" /></p>';
+		$contenu.=afficherErreur('erreurTypeInterExiste');
+		$contenu .= '</fieldset></form>';
+		$contenu.= '<form action = "main.php" method = "post" >
+ 					<p>
+ 					<input type = "submit" name = "afficherToutLesTypeIntervention" value = "Afficher nos Interventions" />
+ 					</p>
+ 					</form>';
+
+
+		if(!empty($_SESSION['TousLesEmploye'])){
+
+			foreach ($_SESSION['TousLesEmploye'] as $employe){
+				$_SESSION['EmployeDirecteur']=$employe;
+				$contenu.=afficherEmploye();
+			}
+			unset($_SESSION['TousLesEmploye']);
+
+		}elseif (!empty($_SESSION['EmployeDirecteur'])){
+				$contenu.=afficherEmploye();
+		}
+
+
+		$contenu .= afficherErreur('erreurChercherEmploye');
+
+		if(!empty($_SESSION['EmployeSupprime'])){
+			$contenu.='<fieldset><p>'.$_SESSION['EmployeSupprime'].'</p></fieldset>';
+			unset($_SESSION['EmployeSupprime']);
+		}
+
+		//partie typeintervention
+
+
+				if(!empty($_SESSION['TypesDIntervention'])){
+					foreach ($_SESSION['TypesDIntervention'] as $typeInter){
+						$contenu.='<fieldset><legend>TypeIntervention - '.$typeInter->nomTI.' </legend>
+				<form action = "main.php" method = "post" >
+				<p>
+				<label>nomTI</label><input name="nomTI" type = "text" value="'.$typeInter->nomTI.'" readonly />
+				</p>
+				<p>
+				<label>montant</label><input name="login" type = "text" value="'.$typeInter->montant.'" />
+				</p>
+				<p>
+				<label>Liste de pieces</label><input name="motDePasse" type = "text" value="'.$typeInter->listePieces.'" />
+				</p>
+				<input type = "submit" name = "modifierEmploye" value = "Modifier Les Information" />
+				<input type = "submit" name = "supprimerEmploye" value = "Ne plus proposer cette intervention" />';
+						//A FAIRE ERREUR ET CONFIRMATION
+						$contenu .='</form></fieldset>';
+					}
+					unset($_SESSION['TypesDIntervention']);
+				}
+				
+				
 		require_once("vue/gabarit.php");
 
+	}
+
+	function afficherEmploye(){
+		$contenu='<fieldset><legend>Employe - '.$_SESSION['EmployeDirecteur']->nomEmploye.' </legend>
+				<form action = "main.php" method = "post" >
+				<p>
+				<label>nomEmploye</label><input name="nomEmploye" type = "text" value="'.$_SESSION['EmployeDirecteur']->nomEmploye.'" readonly />
+				</p>
+				<p>
+				<label>login</label><input name="login" type = "text" value="'.$_SESSION['EmployeDirecteur']->login.'" />
+				</p>
+				<p>
+				<label>motDePasse</label><input name="motDePasse" type = "password" value="'.$_SESSION['EmployeDirecteur']->motDePasse.'" />
+				</p>
+				<p>
+				<label>categorie</label><input type = "text" name = "categorie" value="'. $_SESSION['EmployeDirecteur']->categorie.'" readonly />
+				</p>
+				<input type = "submit" name = "modifierEmploye" value = "Modifier Les Information" />
+				<input type = "submit" name = "supprimerEmploye" value = "Supprimer Employe" />';
+				if(!empty($_SESSION['EmployeMidifie'])){
+					$contenu.='<p>'.$_SESSION['EmployeMidifie'].'</p>';
+					unset($_SESSION['EmployeMidifie']);
+				}
+		$contenu .= afficherErreur('erreurChercherEmploye');
+
+		$contenu .='</form></fieldset>';
+		unset($_SESSION['EmployeDirecteur']);
+		return $contenu;
 	}
 
 	function afficherErreur($n)

@@ -38,10 +38,39 @@
 			ctlSyntheseClient($_SESSION['client']->idClient);
 		} elseif (isset($_POST['creerCompte'])) {
 			ctlCreerCompte($_POST['nomEmploye'], $_POST['login'], $_POST['motDePasse'], $_POST['categorie']);
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 		} elseif (isset($_POST['ajouterClient'])) {
 			ctlAjouterClient();
 			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
-		} else {
+		}
+		elseif (isset($_POST['afficherToutLesComptes'])) {
+			$_SESSION['TousLesEmploye']=ctlChercherToutLesEmploye();
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['chercherEmployeParNom'])) {
+			$_SESSION['EmployeDirecteur']=ctlChercherUnEmploye($_POST['nomEmploye']);
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['modifierEmploye'])) {
+			ctlModifierEmploye();
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['supprimerEmploye'])) {
+			ctlSupprimerEmploye();
+			//si il est pas directeur;
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['creerIntervention'])) {
+			ctlCreerIntervention();
+			//si il est pas directeur;
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['afficherToutLesTypeIntervention'])) {
+			$_SESSION['TypesDIntervention']=ctlChercherTypesIntervention();
+			//si il est pas directeur;
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		else {
 			ctlAcceuil();
 		}
 	} catch (ExceptionLogin $e) {
@@ -74,5 +103,15 @@
 	} catch (ExceptionIdNonTrouveGF $e) {
 		$msg = $e->getMessage();
 		$_SESSION['erreurIdGF'] = $msg;
+		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+	}
+	catch (ExceptionEmploye $e) {
+		$msg = $e->getMessage();
+		$_SESSION['erreurChercherEmploye'] = $msg;
+		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+	}
+	catch (ExceptionTypeInterExiste $e) {
+		$msg = $e->getMessage();
+		$_SESSION['erreurTypeInterExiste'] = $msg;
 		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 	}

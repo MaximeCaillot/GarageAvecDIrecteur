@@ -163,8 +163,64 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 		$requete = "select *  from employe where login='$login' or nomEmploye='$nom'";
 		$resultat = $connexion->query($requete);
 		$resultat->setFetchMode(5);
-		$client = $resultat->fetch();
+		$employe = $resultat->fetch();
 		$resultat->closeCursor();
-		return $client;
+		return $employe ;
+	}
+	function chercherUnEmploye($nom)
+{
+	$connexion = getConnect();
+	$requete = "select *  from employe where nomEmploye='$nom'";
+	$resultat = $connexion->query($requete);
+	$resultat->setFetchMode(5);
+	$employe = $resultat->fetch();
+	$resultat->closeCursor();
+	return $employe ;
+}
+	function supprimerEmploye($nom){
+		$connexion = getConnect();
+		$requete = " delete from employe where nomEmploye='$nom'";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
+	}
+
+	function chercherToutLesEmploye(){
+		$connexion = getConnect();
+		$requete = "select *  from employe";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$employe  = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $employe ;
+	}
+	function modifierEmploye($attributAModifier,$valeur,$nomInitial){
+		$connexion = getConnect();
+		$requete = " update employe set $attributAModifier='$valeur' where nomEmploye='$nomInitial'";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
+	}
+	function creerTypeIntervention($nomTI,$montant,$listePieces) {
+		$connexion = getConnect();
+		$requete = " insert into typeintervention VALUES ('$nomTI','$montant','$listePieces')";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
+	}
+	function chercherTypeIntervention($nom){
+		$connexion = getConnect();
+		$requete = "select *  from typeintervention where nomTI='$nom'";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$ti  = $resultat->fetch();
+		$resultat->closeCursor();
+		return $ti ;
+	}
+	function chercherToutTypeIntervention(){
+		$connexion = getConnect();
+		$requete = "select *  from typeintervention";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$ti  = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $ti ;
 	}
 

@@ -20,7 +20,9 @@
 	{
 
 	}
+	class ExceptionTypeInterExiste extends  Exception{
 
+	}
 	class ExceptionIdNonTrouveSynthese extends Exception
 	{
 
@@ -31,6 +33,7 @@
 	}
 
 	class ExceptionClientExiste extends Exception{}
+	class ExceptionEmploye extends Exception{}
 
 	class ExceptionEmployeExisteDeja extends Exception
 	{
@@ -196,6 +199,7 @@
 		if (in_array($_POST['categorie'], array("mecanicien", "directeur", "agent"))) {
 			if ($empl = chercherEmploye($_POST['nomEmploye'], $_POST['login']) == null) {
 				creerCompte($_POST['nomEmploye'], $_POST['login'], $_POST['motDePasse'], $_POST['categorie']);
+				$_SESSION['nouveauCompte']='Nouveau compte de '.$_POST['nomEmploye'].' a été créé';
 			} else {
 				throw new ExceptionEmployeExisteDeja("Employe avec ce nom ou login existe deja");
 			}
@@ -204,6 +208,73 @@
 		}
 	}
 
+
+	function ctlChercherToutLesEmploye(){
+		return  chercherToutLesEmploye();
+	}
+
+	function ctlChercherUnEmploye($nom){
+		if(empty($nom))
+			throw new ExceptionEmploye("Veuillez entrer le nom d'employe");
+		if(($employe=chercherUnEmploye($nom))!=null){
+			return $employe;
+		}
+		else{
+			throw new ExceptionEmploye("Pas d'employe avec ce nom");
+		}
+	}
+
+	function ctlModifierEmploye(){
+		$modifications='';
+		$employe=(array)chercherUnEmploye($_POST['nomEmploye']);
+		foreach ($employe as $cle => $valeur)
+			if(!empty($_POST[$cle])){
+				if($_POST[$cle]!=$valeur){
+					modifierEmploye($cle,$_POST[$cle],$_POST['nomEmploye']);
+					//sauvgarder les modifs
+					$modifications .=ucfirst($cle).' de '.$_POST['nomEmploye'].' a ete modifie. ';
+				}
+
+					if(!empty($_SESSION['TousLesEmploye'])){
+						unset($_SESSION['TousLesEmploye']);
+					}
+					$_SESSION['EmployeDirecteur']=chercherUnEmploye($_POST['nomEmploye']);
+					//alors je vais afficher celui qui a ete modifier avec le message special
+				if(!empty($modifications))
+					$_SESSION['EmployeMidifie']='Employe a bien été mofifie. '.$modifications;
+				else
+					$_SESSION['EmployeMidifie']='Aucun changement n\'a été éffectué';
+
+			}else {
+				throw new ExceptionEmploye("L'un des champs est vide veuillez garder tout les champs remplis");
+			}
+
+	}
+	function ctlChercherTypesIntervention(){
+		return chercherToutTypeIntervention();
+	}
+	function ctlSupprimerEmploye(){
+		if($_POST['nomEmploye']==$_SESSION['empl']->nomEmploye){
+			echo 'lol';
+
+			throw new ExceptionEmploye("Vous pouvez pas supprimer votre propre compte sinon vous etes coincé");
+		}
+
+		else{
+			supprimerEmploye($_POST['nomEmploye']);
+			$_SESSION['EmployeSupprime']=$_POST['nomEmploye'].' a bien ete supprimé.';
+			unset($_SESSION['TousLesEmploye']);
+		}
+
+	}
+
+	function ctlCreerIntervention(){
+		if(($intervention=chercherTypeIntervention($_POST['nomTI']))!=null){
+			throw new ExceptionTypeInterExiste("Intervention avec ce nom existe deja");
+		}else{
+			creerTypeIntervention($_POST['nomTI'],$_POST['montant'],$_POST['listePieces']);
+		}
+	}
 	function CtlErreur($erreur)
 	{
 		afficherErreurLogin($erreur);
