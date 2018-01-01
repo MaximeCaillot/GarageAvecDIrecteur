@@ -244,14 +244,24 @@
 				<label>nomTI</label><input name="nomTI" type = "text" value="'.$typeInter->nomTI.'" readonly />
 				</p>
 				<p>
-				<label>montant</label><input name="login" type = "text" value="'.$typeInter->montant.'" />
+				<label>montant</label><input name="montant" type = "text" value="'.$typeInter->montant.'" required  />
 				</p>
 				<p>
-				<label>Liste de pieces</label><input name="motDePasse" type = "text" value="'.$typeInter->listePieces.'" />
+				<label>Liste de pieces</label><input name="listePieces" type = "text" value="'.$typeInter->listePieces.'" />
 				</p>
-				<input type = "submit" name = "modifierEmploye" value = "Modifier Les Information" />
-				<input type = "submit" name = "supprimerEmploye" value = "Ne plus proposer cette intervention" />';
+				<input type = "submit" name = "modifierIntervention" value = "Modifier Les Information" />
+				<input type = "submit" name = "supprimerIntervention" value = "Ne plus proposer cette intervention" />';
 						//A FAIRE ERREUR ET CONFIRMATION
+						if(!empty($_SESSION['InterModifie']) && $typeInter->nomTI==$_SESSION['InterModifie']){
+							if(!empty($_SESSION['erreurMontantNegatif'])){
+								$contenu.=afficherErreur('erreurMontantNegatif');
+								unset($_SESSION['InterModifie']);
+							}else{
+								$contenu .='<p>Intervention a bien été modifié</p>';
+								unset($_SESSION['InterModifie']);
+							}
+
+						}
 						$contenu .='</form></fieldset>';
 					}
 					unset($_SESSION['TypesDIntervention']);

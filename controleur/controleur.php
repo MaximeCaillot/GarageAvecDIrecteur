@@ -15,7 +15,7 @@
 	{
 
 	}
-
+	class ExceptionMontantNegatif extends Exception{}
 	class ExceptionIdNonTrouveGF extends Exception
 	{
 
@@ -267,7 +267,18 @@
 		}
 
 	}
+	function ctlModifierIntervention(){
+		$_SESSION['InterModifie']=$_POST['nomTI'];
+		if($_POST['montant']<0){
+			throw new ExceptionMontantNegatif("Le montant doit être positif");
+		}
+		modifierIntervention($_POST['nomTI'],$_POST['montant'],$_POST['listePieces']);
 
+	}
+
+	function 	ctlSupprimerIntervention(){
+		supprimerIntervention($_POST['nomTI']);
+	}
 	function ctlCreerIntervention(){
 		if(($intervention=chercherTypeIntervention($_POST['nomTI']))!=null){
 			throw new ExceptionTypeInterExiste("Intervention avec ce nom existe deja");
@@ -275,6 +286,8 @@
 			creerTypeIntervention($_POST['nomTI'],$_POST['montant'],$_POST['listePieces']);
 		}
 	}
+
+
 	function CtlErreur($erreur)
 	{
 		afficherErreurLogin($erreur);

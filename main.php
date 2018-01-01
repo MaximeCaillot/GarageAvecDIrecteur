@@ -70,6 +70,18 @@
 			//si il est pas directeur;
 			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 		}
+		elseif (isset($_POST['modifierIntervention'])) {
+			ctlModifierIntervention();
+			$_SESSION['TypesDIntervention']=ctlChercherTypesIntervention();
+
+			//si il est pas directeur;
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['supprimerIntervention'])) {
+			ctlSupprimerIntervention();
+			//si il est pas directeur;
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
 		else {
 			ctlAcceuil();
 		}
@@ -113,5 +125,11 @@
 	catch (ExceptionTypeInterExiste $e) {
 		$msg = $e->getMessage();
 		$_SESSION['erreurTypeInterExiste'] = $msg;
+		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+	}
+	catch (ExceptionMontantNegatif $e) {
+		$msg = $e->getMessage();
+		$_SESSION['TypesDIntervention']=ctlChercherTypesIntervention();
+		$_SESSION['erreurMontantNegatif'] = $msg;
 		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 	}

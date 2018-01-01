@@ -223,4 +223,15 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 		$resultat->closeCursor();
 		return $ti ;
 	}
-
+	function modifierIntervention($nomTI,$montant,$listePieces){
+		$connexion = getConnect();
+		$requete = " update typeintervention set  montant='$montant',listePieces='$listePieces' where nomTI='$nomTI'";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
+	}
+	function supprimerIntervention($nom){
+		$connexion = getConnect();
+		$requete = " delete from typeintervention where nomTI='$nom'";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
+	}
