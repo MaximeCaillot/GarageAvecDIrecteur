@@ -93,15 +93,21 @@
 				<p><label>Adresse</label><input name="adresse" type = "text" value = "' . $client->adresse . '" /></p>
 				<p><label>Téléphone</label><input name="numTel" type = "text" value = "' . $client->numTel . '" /></p>
 				<p><label>E-mail</label><input name="mail" type = "text" value = "' . $client->mail . '" /></p>
-				<p><label>Montant max</label><input name="montantMax" type = "text" value = "' . $client->montantMax . '" /></p>
-				<input type = "submit" name = "modifierClient" value = "Mettre a jour" />
+				<p><label>Montant max</label><input name="montantMax" type = "text" value = "' . $client->montantMax . '" /></p>';
+				if($_SESSION['empl']->categorie=='agent')
+				$contenu.='<input type = "submit" name = "modifierClient" value = "Mettre a jour" />';
 
-				</fieldset></form>';
+				$contenu.='</fieldset></form>';
+		if($_SESSION['empl']->categorie=='agent'){
+			$contenu .= '<p>Montant différé en cours : ' . $somme . '€</p>';
+			$contenu .= '<p>Crédit possible restant : ' . $dispo . '</p>';
+		}
 
-		$contenu .= '<p>Montant différé en cours : ' . $somme . '€</p>';
-		$contenu .= '<p>Crédit possible restant : ' . $dispo . '</p>';
-
+		if($_SESSION['empl']->categorie=='agent')
 		$contenu .= '<fieldset><legend>Interventions réalisées</legend>';
+		else
+		$contenu .= '<fieldset><legend>Details d\'intervention</legend>';
+
 		if (!empty($interventions)) {
 			$contenu .= '<table>
 						<tr>
@@ -111,11 +117,26 @@
 							<th>Etat</th>
 							<th>Montant</th>
 						</tr>';
+			$tok="";
 			foreach ($interventions as $inter) {
 				$contenu .= '<tr><td>' . $inter->dateIntervention . '</td><td>' . $inter->nomTI . '</td><td>' . $inter->nomMeca . '</td><td>' . $inter->etat . '</td><td>' . $inter->montant . '</td></tr>';
+				$tok=strtok($inter->listePieces,",");
 			}
 			$contenu .= '</table>';
 		} else $contenu .= '<p>Aucune intervetion n\'a été réalisée.</p>';
+
+		if($_SESSION['empl']->categorie=='mecanicien'){
+		$contenu.='<fieldset><legend>Liste de pieces a fournir</legend><table><th>Piece a fournir</th>';
+		while($tok!==false){
+
+			$contenu.='<tr><td>'.$tok.'</td></tr>';
+			$tok = strtok(",");
+		}
+
+		
+		$contenu.='</table></fieldset>';
+		}
+
 		$contenu .= '</fieldset>';
 		require_once("vue/gabarit.php");
 	}
@@ -299,6 +320,110 @@
 		unset($_SESSION['EmployeDirecteur']);
 		return $contenu;
 	}
+
+
+
+
+	function afficherJournee($jr){
+
+		$contenu='<table>';
+		for ($i = 8; $i <= 19; $i++){
+			$contenu.='<tr><td>'. $i .'h</td>';
+
+			foreach ($jr as $j){
+				if ($j->heureIntervention==$i){
+					$contenu.='<td>'.$j->nomTI . '</td>' ;
+					if($j->nomMeca==$_SESSION['empl']->nomEmploye&&$j->nomTI!='formation')
+						$contenu.='<td><input type="submit" name="syntese" value="Syntese"/>
+										<input  name="idClient" type="hidden" value="'.$j->idClient.'">
+										<input  name="code" type="hidden" value="'.$j->code.'">';
+				}
+			}
+
+
+			$contenu.='</tr>';
+		}
+		$contenu.='</table>';
+		return $contenu;
+	}
+	function afficherPlanningMecanicien($mecanicien,$journee){
+		$header = '<form action="main.php" method="post"><p>' . $_SESSION['empl']->nomEmploye .
+			'<input type = "submit" name = "accueil" value = "Accueil" /><input type="submit" name="deco" value="Déconnexion"/></p></form>';
+		$contenu = '<form action = "main.php" method = "post" ><fieldset><legend>Planning de '. $mecanicien->nomEmploye .'</legend>';
+
+		$contenu.=afficherJournee($journee);
+
+
+		$contenu .= '</fieldset></form>';
+		require_once("vue/gabarit.php");
+	}
+
+
+	function afficherAccueilMecanicien($mecanicien,$lesmecanos)
+	{
+		$header = '<form action="main.php" method="post"><p>' . $_SESSION['empl']->nomEmploye .
+			'<input type="submit" name="deco" value="Déconnexion"/></p></form>';
+
+		$contenu = '<form action = "main.php" method = "post" ><fieldset><legend>Planning Mécaniciens</legend>
+<input type = "date" name = "datePlanning" value=""/>';
+
+
+		/*
+		foreach ($mecanicien as $meca){
+			$contenu .= '<table><tr><td></td><th>' .
+				$meca->nomEmploye . '</th>';
+			$contenu.=afficherJournee(getJournee($meca->nomEmploye));
+			$contenu .='</tr></table><input type = "date" name = "datePlanning" value=""/>
+            <input type = "submit" name = "planning" value = "Planning" />';
+		}
+		*/
+		$contenu.='<select name="meca">';
+		foreach ($lesmecanos as $mec){
+			$contenu.='<option value="'.$mec->nomEmploye.'" >'.$mec->nomEmploye.'</option>';
+		}
+		$contenu.='</select>';
+		$contenu.=' <input type = "submit" name = "afficherPlaningMecano" value = "AfficherPlanning" />';
+		$contenu .= '</fieldset>';
+		$contenu.='</form>';
+
+
+
+
+
+
+
+
+
+		$contenu.='<form action = "main.php" method = "post" ><fieldset><legend>Formation</legend>
+                <p>
+                <label>Date Formation :</label>
+                <input type = "date" name = "dateFormation" />
+                <label>Heure :</label>
+                <input type = "number" name = "heureFormation" />
+                <input type = "submit" name = "saisirFormation" value = "Saisir" />
+                </p>';
+
+		$contenu .= afficherErreur('erreurFormation');
+		if(!empty($_SESSION['formationInsere'])){
+			$contenu.='<p>'.$_SESSION['formationInsere'].'</p>';
+			unset($_SESSION['formationInsere']);
+		}
+		$contenu .= '</fieldset></form>';
+		require_once("vue/gabarit.php");
+	}
+
+	function afficherInterJournee($mecanicien)
+	{
+		$header = '<form action="main.php" method="post"><p>' . $_SESSION['empl']->nomEmploye .
+			'<input type = "submit" name = "accueil" value = "Accueil" /><input type="submit" name="deco" value="Déconnexion"/></p></form>';
+		$contenu = '<form action = "main.php" method = "post" ><fieldset><legend>Planning de . $mecanicien->nomMeca .</legend>';
+		$contenu .= '</fieldset></form>';
+		require_once("vue/gabarit.php");
+	}
+
+
+
+
 
 	function afficherErreur($n)
 	{

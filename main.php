@@ -82,6 +82,22 @@
 			//si il est pas directeur;
 			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 		}
+		elseif (isset($_POST['planningJournee'])) {
+			ctlInterJournee();
+		} elseif (isset($_POST['saisirFormation'])) {
+			ctlFormation($_POST['dateFormation'],$_POST['heureFormation']);
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+		}
+		elseif (isset($_POST['afficherPlaningMecano'])) {
+
+			ctlPlanningUnMecano($_POST['meca'],$_POST['datePlanning']);
+
+		}
+		elseif (isset($_POST['syntese'])) {
+
+			ctlSyntheseClient($_POST['idClient']);
+
+		}
 		else {
 			ctlAcceuil();
 		}
@@ -131,5 +147,10 @@
 		$msg = $e->getMessage();
 		$_SESSION['TypesDIntervention']=ctlChercherTypesIntervention();
 		$_SESSION['erreurMontantNegatif'] = $msg;
+		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+	}
+	catch (ExceptionFormation $e) {
+		$msg = $e->getMessage();
+		$_SESSION['erreurFormation'] = $msg;
 		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 	}

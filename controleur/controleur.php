@@ -15,6 +15,9 @@
 	{
 
 	}
+	class ExceptionFormation extends Exception
+	{
+	}
 	class ExceptionMontantNegatif extends Exception{}
 	class ExceptionIdNonTrouveGF extends Exception
 	{
@@ -96,6 +99,7 @@
 				afficherAccueilAgent($employe);
 				break;
 			case'mecanicien':
+				afficherAccueilMecanicien(getMecanicien($_SESSION['empl']->nomEmploye),getToutLesMecanos());
 				break;
 			case'directeur':
 				afficherAccueilDirecteur($employe);
@@ -143,12 +147,19 @@
 			modifierClient($client['idClient'],$modifs);
 		}
 	}
+	function ctlPlanningUnMecano($nom,$date){
+		$j=getJournee($nom,$date);
 
+	afficherPlanningMecanicien(getMecanicien($nom),$j);
+	}
 	function ctlSyntheseClient($id)
 	{
 		if($client=ctlGetClient($id)) {
 			$_SESSION['client'] = $client;
+			if($_SESSION['empl']->categorie=='agent')
 			$interventions = getInterventionsPasses($id);
+			elseif($_SESSION['empl']->categorie=='mecanicien')
+				$interventions = getInterventionParIdCode($id,$_POST['code']);
 			$diff = getInterDiff($id);
 			$sommediff = 0;
 			foreach ($diff as $intd) {
@@ -285,6 +296,35 @@
 		}else{
 			creerTypeIntervention($_POST['nomTI'],$_POST['montant'],$_POST['listePieces']);
 		}
+	}
+
+
+
+	function ctlJournee($mecanicien){
+		afficherJournee(getJournee($mecanicien));
+	}
+
+	function ctlFormation($date,$heure){
+		if($heure<8||$heure>19)
+			throw new ExceptionFormation("heure doit etre entre 8 et 19 h, sinon je viens pas :p");
+		$employe=$_SESSION['empl']->nomEmploye;
+		$inter=getInter($employe);
+		$formation=getFormation($employe);
+		foreach ($inter as $i){
+			if ($i->dateIntervention == $date && $i->heureIntervention == $heure){
+				throw new ExceptionFormation("Formation impossible (Intervention ou Formation déjà présente)");
+			}
+		}
+		foreach ($formation as $f){
+			if ($f->dateForm == $date && $f->heureForm == $heure){
+				throw new ExceptionFormation("Formation impossible (Intervention ou Formation déjà présente)");
+			}
+		}
+
+
+
+		ajouterFormation($date,$heure,$employe);
+		$_SESSION['formationInsere']='Formation a été ajouté le '.$date.' à '.$heure;
 	}
 
 

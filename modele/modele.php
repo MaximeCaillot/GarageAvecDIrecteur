@@ -235,3 +235,72 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 		$resultat = $connexion->query($requete);
 		$resultat->closeCursor();
 	}
+	function getMecanicien($nom){
+		$connexion = getConnect();
+		$requete = "select nomEmploye from employe where categorie='mecanicien' and nomEmploye='$nom' ";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$mecanicien = $resultat->fetch();
+		$resultat->closeCursor();
+		return $mecanicien;
+	}
+	function getInter($employe){
+		$connexion = getConnect();
+		$requete = "select * from intervention where nomMeca='$employe'";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$inter = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $inter;
+	}
+	function getJournee($employe,$date){
+		if(empty($date)){
+			$date= date('Y-m-d');
+		}
+
+
+		$connexion = getConnect();
+		$requete = "select nom,prenom,nomMeca,heureIntervention,nomTI,idClient,code from client natural join intervention where
+ nomMeca='$employe' and dateIntervention='$date' union select '','',nomEmploye,heureForm,'formation','','' from formation where nomEmploye='$employe' and dateForm='$date' order by heureIntervention";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$inter = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $inter;
+	}
+
+	function getFormation($employe){
+		$connexion = getConnect();
+		$requete = "select * from formation where nomEmploye='$employe'";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$formation = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $formation;
+	}
+
+	function ajouterFormation($date,$heure,$employe){
+		$connexion = getConnect();
+		$requete = "INSERT INTO `formation`(dateForm,heureForm,nomEmploye) VALUES ('$date', '$heure','$employe')";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
+	}
+
+	function getInterventionParIdCode($id,$code){
+		$connexion = getConnect();
+		$requete = "select * from typeintervention NATURAL JOIN intervention where code='$code' and idClient='$id' ";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$inter = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $inter;
+	}
+	function getToutLesMecanos(){
+		$connexion = getConnect();
+		$requete = "select * from employe where categorie='mecanicien'";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$mecanos = $resultat->fetchAll();
+		$resultat->closeCursor();
+		return $mecanos;
+	}
