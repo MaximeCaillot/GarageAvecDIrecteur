@@ -18,6 +18,9 @@
 	class ExceptionFormation extends Exception
 	{
 	}
+	class ExceptionPriseRdv extends Exception
+	{
+	}
 	class ExceptionMontantNegatif extends Exception{}
 	class ExceptionIdNonTrouveGF extends Exception
 	{
@@ -96,7 +99,7 @@
 		switch ($employe->categorie) {
 			case'agent':
 
-				afficherAccueilAgent($employe);
+				afficherAccueilAgent($employe,getToutLesMecanos(),chercherToutTypeIntervention());
 				break;
 			case'mecanicien':
 				afficherAccueilMecanicien(getMecanicien($_SESSION['empl']->nomEmploye),getToutLesMecanos());
@@ -106,6 +109,32 @@
 				break;
 		}
 	}
+	function ctlSetPlaningMecanos($nomMecano,$dateDebutSemaine){
+			//cherche le planning de mecanicien pour chaque jour
+		// de la semaine a partir de la date passe en parametre
+
+			//creation d'un objet DateTime modifiable
+			$date=  new \DateTime(date('Y-m-d', strtotime($dateDebutSemaine)));
+
+
+			$jours=array();
+
+			for ($i=0; $i<7;$i++){
+				$x=getJournee($nomMecano,$date->format('Y-m-d'));
+				$jours[$i]=$x;
+				//le jour suivant
+				$date->modify('+ 1 days');
+			}
+		$_SESSION['PlaningSemaineMecano']=$jours;
+		/*foreach ($jours as $d){
+				foreach ($d as $j)
+				echo $j->nomTI.' j '.$j->dateIntervention.' a '.$j->heureIntervention.'<br>';
+				echo 'jour op<br>';
+		}*/
+
+	}
+
+
 
 	function ctlChercherIdentifiantsEmploye($login, $motdepasse)
 	{
@@ -180,7 +209,7 @@
 		if ($client = getIdClient($nom, $dateNaiss)) {
 			$_SESSION['rechercheIdClient'] = $client;
 		} else {
-			throw new ExceptionClientNonTrouve("Aucun client " . $nom . " né le " . $dateNaiss . " trouvé.");
+			throw new ExceptionClientNonTrouve("Aucun client  trouvé.");
 		}
 
 	}
@@ -326,7 +355,25 @@
 		ajouterFormation($date,$heure,$employe);
 		$_SESSION['formationInsere']='Formation a été ajouté le '.$date.' à '.$heure;
 	}
+	function ctlPrendreRendezVous($nomTI,$date,$heureIntervention,$nomMecano,$idClient){
+		if($heureIntervention>19 || $heureIntervention<8){
+			throw new ExceptionPriseRdv("Tout les mecaaniciens travaillent entre 8 et 19 h");
 
+		}
+		if(($form=getFormationParDateHeure($nomMecano,$date,$heureIntervention))!=null){
+			throw new ExceptionPriseRdv("Il existe deja une formation a cette heure pour ce mecanicien");
+		}
+		if(($interv=getInterventionParDateHeure($nomMecano,$date,$heureIntervention))!=null){
+			throw new ExceptionPriseRdv("Il existe deja une intervention a cette heure pour ce mecanicien");
+		}
+		prendreRdv($nomTI,$date,$heureIntervention,$nomMecano,$idClient);
+		$intercree=getInterventionParDateHeure($nomMecano,$date,$heureIntervention);
+
+		$_SESSION['succesRendezVousListePieces']='Pieces a fournir: '.getInterventionParIdCode($idClient,$intercree->code)->listePieces;
+
+
+
+	}
 
 	function CtlErreur($erreur)
 	{

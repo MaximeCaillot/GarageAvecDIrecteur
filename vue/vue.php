@@ -13,7 +13,7 @@
 		require_once("vue/gabaritLogin.php");
 	}
 
-	function afficherAccueilAgent($employe)
+	function afficherAccueilAgent($employe,$lesmecanos,$typesinterventions)
 	{
 		$header = '<form action="main.php" method="post"><p>' . $_SESSION['empl']->nomEmploye .
 			'<input type="submit" name="deco" value="Déconnexion"/></p></form>';
@@ -44,10 +44,10 @@
 	<fieldset>
 	<legend>Rechercher id client</legend>
 	<p>
-	    <label>Nom client</label><input type="text" name="nomclient" required/>
+	    <label>Nom client</label><input type="text" name="nomclient" />
     </p>
     <p>
-        <label>Date de naissance</label><input type="date" name="dateNaiss" required/>
+        <label>Date de naissance</label><input type="date" name="dateNaiss" />
     </p>
     <p><input type="submit" name="rechercheID" value="Rechercher"/></p>';
 		if (!empty($_SESSION['rechercheIdClient'])) {
@@ -55,7 +55,8 @@
 	<p>
 	    Client : ' . $_SESSION['rechercheIdClient']->nom .
 				' Identifiant : ' . $_SESSION['rechercheIdClient']->idClient . '
-    </p>';
+    <input type = "submit" name = "syntheseDirect" value = "Synthèse client" /></p> 
+    <input  name="idClient" type="hidden" value="'.$_SESSION['rechercheIdClient']->idClient.'">';
 			unset($_SESSION['rechercheIdClient']);
 		}
 		$contenu .= afficherErreur('erreurClient');
@@ -74,9 +75,84 @@
 		$contenu .= afficherErreur('erreurClientExiste');
 		$contenu .= '</fieldset></form>';
 
-		require_once("vue/gabarit.php");
+		$contenu.='<form action="main.php" method="post"> <fieldset><legend>Planning mecaniciens</legend>';
 
-	}
+		$contenu.='<label>Nom Mecanicien</label>';
+		$contenu.=listeMecanos($lesmecanos);
+		$contenu.='<label> Semaine</label>';
+		$contenu.=listeSemaines();
+		$contenu.='<p><input type = "submit" name = "planingMecanoSemaine" value = "Afficher Planning" /></p>';
+
+		if(!empty($_SESSION['PlaningSemaineMecano'])){
+			//tableau de jours de la semaine choisie avec les pleages
+			$contenu .= '<table>
+						<tr>
+							<th>Heure</th>
+							<th>Lundi</th>
+							<th>Mardi</th>
+							<th>Mercredi</th>
+							<th>Jeudi</th>
+							<th>Vendredi</th>
+							<th>Samedi</th>
+							<th>Dimanche</th>
+						</tr>';
+
+			//-intervention
+			//--formation--
+			//----libre----
+			for($k=8;$k<20;$k++){
+				$contenu.='<tr><td>'.$k.'h</td>';
+				for ($i=0;$i<7;$i++){
+					$nonlibr=false;
+					$iemejourne =$_SESSION['PlaningSemaineMecano'][$i];
+					//iemejourne-contient les formation et inter de la journe $i
+					foreach ($iemejourne as $intervention) {
+						if(!empty($intervention->nomTI)&&$intervention->heureIntervention==$k){
+							$contenu.='<td>'.$intervention->nomTI.'</td>';
+							$nonlibr=true;
+						}
+					}
+
+						if(!$nonlibr)
+							$contenu.='<td>-</td>';
+
+
+				}
+				$contenu.='</tr>';
+				}
+			$contenu.='</table>';
+			unset($_SESSION['PlaningSemaineMecano']);
+			}
+
+		$contenu.='</fieldset></form>';
+		$contenu.='<form ction="main.php" method="post"><fieldset><legend>Prise de rdv</legend>';
+		$contenu.='<p><label>Type intervention</label><select name="nomTI">';
+		foreach ($typesinterventions as $type){
+			$contenu.='<option value="'.$type->nomTI.'">'.$type->nomTI.'</option>';
+		}
+		$contenu.='</select></p>';
+
+		$contenu.='<p><label>Date de rdv </label><input type="date" name="dateRdvAPrendre" />';
+		$contenu.='<label>Heure de rdv </label><input type="number" name="heureRdvAPrendre" /></p>';
+		$contenu.='<label>Le mecanicien </label>';
+		$contenu.=listeMecanos($lesmecanos);
+		$contenu.='<label>Id client </label><input type="number" name="idClient" />';
+		$contenu.='<p><input type="submit" name="priseRDV" value="Prendre rendez-vous" /></p>';
+
+		$contenu.=afficherErreur('ErreurRendezVous');
+		if(!empty($_SESSION['succesRendezVousListePieces'])){
+			$contenu.=$_SESSION['succesRendezVousListePieces'];
+			unset($_SESSION['succesRendezVousListePieces']);
+		}
+		$contenu.='</fieldset></form>';
+
+
+
+		require_once("vue/gabarit.php");
+		}
+
+
+
 
 	function afficherSynthese($client, $interventions, $somme, $dispo)
 	{
@@ -377,11 +453,7 @@
             <input type = "submit" name = "planning" value = "Planning" />';
 		}
 		*/
-		$contenu.='<select name="meca">';
-		foreach ($lesmecanos as $mec){
-			$contenu.='<option value="'.$mec->nomEmploye.'" >'.$mec->nomEmploye.'</option>';
-		}
-		$contenu.='</select>';
+		$contenu.=listeMecanos($lesmecanos);
 		$contenu.=' <input type = "submit" name = "afficherPlaningMecano" value = "AfficherPlanning" />';
 		$contenu .= '</fieldset>';
 		$contenu.='</form>';
@@ -410,6 +482,35 @@
 		}
 		$contenu .= '</fieldset></form>';
 		require_once("vue/gabarit.php");
+	}
+	function listeMecanos($lesmecanos){
+		$contenu='<select name="meca">';
+		foreach ($lesmecanos as $mec){
+			$contenu.='<option value="'.$mec->nomEmploye.'" >'.$mec->nomEmploye.'</option>';
+		}
+		$contenu.='</select>';
+		return $contenu;
+	}
+	function listeSemaines(){
+		$contenu= '<select name="semaines">';
+
+		for( $i=0; $i <52; $i++ ) {
+			$date = date('Y-m-d', strtotime('+' . $i . ' week'));
+
+			$nbDay = date('N', strtotime($date));
+
+			$monday = new \DateTime($date);
+
+			$sunday = new \DateTime($date);
+
+			$monday->modify('-' . ($nbDay - 1) . ' days');
+			$sunday->modify('+' . (7 - $nbDay) . ' days');
+
+			$contenu.= '<option value="'.$monday->format('Y-m-d').'">'.'Sem. '.($i+1).': '.$monday->format('Y-m-d') . ' - ' . $sunday->format('Y-m-d').'</option>';
+
+		}
+		$contenu.='</select >';
+		return $contenu;
 	}
 
 	function afficherInterJournee($mecanicien)

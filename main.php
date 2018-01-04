@@ -1,4 +1,12 @@
 <?php
+
+
+
+
+
+
+
+
 	try {
 		require_once("controleur/controleur.php");
 		session_start();
@@ -82,6 +90,10 @@
 			//si il est pas directeur;
 			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 		}
+		elseif (isset($_POST['syntheseDirect'])) {
+			 ctlSyntheseClient($_POST['idClient']);
+
+		}
 		elseif (isset($_POST['planningJournee'])) {
 			ctlInterJournee();
 		} elseif (isset($_POST['saisirFormation'])) {
@@ -98,8 +110,29 @@
 			ctlSyntheseClient($_POST['idClient']);
 
 		}
+		elseif (isset($_POST['planingMecanoSemaine'])) {
+
+			ctlSetPlaningMecanos($_POST['meca'],$_POST['semaines']);
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+
+
+		}
+		elseif (isset($_POST['priseRDV'])) {
+
+			ctlPrendreRendezVous($_POST['nomTI'],$_POST['dateRdvAPrendre'],$_POST['heureRdvAPrendre'],$_POST['meca'],$_POST['idClient'],$_POST['idClient']);
+			ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+
+
+		}
 		else {
+
+
+
+
+
+
 			ctlAcceuil();
+
 		}
 	} catch (ExceptionLogin $e) {
 		$msg = $e->getMessage();
@@ -152,5 +185,10 @@
 	catch (ExceptionFormation $e) {
 		$msg = $e->getMessage();
 		$_SESSION['erreurFormation'] = $msg;
+		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
+	}
+	catch (ExceptionPriseRdv $e) {
+		$msg = $e->getMessage();
+		$_SESSION['ErreurRendezVous'] = $msg;
 		ctlAfficherPageCorrespondante($_SESSION['empl']->login, $_SESSION['empl']->motDePasse);
 	}

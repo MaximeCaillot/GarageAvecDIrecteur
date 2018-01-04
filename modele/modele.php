@@ -260,8 +260,8 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 
 
 		$connexion = getConnect();
-		$requete = "select nom,prenom,nomMeca,heureIntervention,nomTI,idClient,code from client natural join intervention where
- nomMeca='$employe' and dateIntervention='$date' union select '','',nomEmploye,heureForm,'formation','','' from formation where nomEmploye='$employe' and dateForm='$date' order by heureIntervention";
+		$requete = "select nom,prenom,nomMeca,heureIntervention,nomTI,idClient,code,dateIntervention from client natural join intervention where
+ nomMeca='$employe' and dateIntervention='$date' union select '','',nomEmploye,heureForm,'formation','','',dateForm from formation where nomEmploye='$employe' and dateForm='$date' order by heureIntervention";
 		$resultat = $connexion->query($requete);
 		$resultat->setFetchMode(5);
 		$inter = $resultat->fetchAll();
@@ -278,6 +278,15 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 		$resultat->closeCursor();
 		return $formation;
 	}
+	function getFormationParDateHeure($employe,$date,$heure){
+		$connexion = getConnect();
+		$requete = "select * from formation where nomEmploye='$employe' and dateForm='$date' and heureForm='$heure'";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$formation = $resultat->fetch();
+		$resultat->closeCursor();
+		return $formation;
+	}
 
 	function ajouterFormation($date,$heure,$employe){
 		$connexion = getConnect();
@@ -291,7 +300,16 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 		$requete = "select * from typeintervention NATURAL JOIN intervention where code='$code' and idClient='$id' ";
 		$resultat = $connexion->query($requete);
 		$resultat->setFetchMode(5);
-		$inter = $resultat->fetchAll();
+		$inter = $resultat->fetch();
+		$resultat->closeCursor();
+		return $inter;
+	}
+	function getInterventionParDateHeure($nomMecano,$date,$heureIntervention){
+		$connexion = getConnect();
+		$requete = "select * from intervention  where nomMeca='$nomMecano' and dateIntervention='$date' and heureIntervention='$heureIntervention' ";
+		$resultat = $connexion->query($requete);
+		$resultat->setFetchMode(5);
+		$inter = $resultat->fetch();
 		$resultat->closeCursor();
 		return $inter;
 	}
@@ -303,4 +321,12 @@ heureIntervention+1 < hour(now()) order by dateIntervention desc";
 		$mecanos = $resultat->fetchAll();
 		$resultat->closeCursor();
 		return $mecanos;
+	}
+
+	function prendreRdv($nomTI,$date,$heureIntervention,$nomMecano,$idClient){
+		$connexion = getConnect();
+		$requete = "INSERT INTO `intervention`(nomTI,dateIntervention,heureIntervention,nomMeca,idClient,etat) VALUES 
+					('$nomTI','$date','$heureIntervention','$nomMecano','$idClient','en attante de payment')";
+		$resultat = $connexion->query($requete);
+		$resultat->closeCursor();
 	}
